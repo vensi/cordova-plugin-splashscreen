@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
@@ -352,9 +353,20 @@ public class SplashScreen extends CordovaPlugin {
                 spinnerDialog.setCancelable(false);
                 spinnerDialog.setIndeterminate(true);
 
+                DisplayMetrics displaymetrics = new DisplayMetrics();
+                cordova.getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+                int height = displaymetrics.heightPixels;
+                int width = displaymetrics.widthPixels;
+
+                RelativeLayout loadingLayout = new RelativeLayout(cordova.getActivity());
+                RelativeLayout.LayoutParams relativeParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+                loadingLayout.setLayoutParams(relativeParams);
+
                 RelativeLayout centeredLayout = new RelativeLayout(cordova.getActivity());
                 centeredLayout.setGravity(Gravity.CENTER);
-                centeredLayout.setLayoutParams(new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+                params.topMargin = (height * 30)/100;
+                centeredLayout.setLayoutParams(params);
 
                 ProgressBar progressBar = new ProgressBar(webView.getContext());
                 RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
@@ -367,7 +379,8 @@ public class SplashScreen extends CordovaPlugin {
                 spinnerDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
                 spinnerDialog.show();
-                spinnerDialog.setContentView(centeredLayout);
+                loadingLayout.addView(centeredLayout);
+                spinnerDialog.setContentView(loadingLayout);
             }
         });
     }
