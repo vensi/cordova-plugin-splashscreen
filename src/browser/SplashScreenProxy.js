@@ -19,120 +19,15 @@
  *
 */
 
-// Default parameter values including image size can be changed in `config.xml`
-var splashImageWidth = 170;
-var splashImageHeight = 200;
-var position = { x: 0, y: 0, width: splashImageWidth, height: splashImageHeight }; 
-var localSplash; // the image to display
-var localSplashImage;
-var bgColor = "#464646";
-var imageSrc = '/img/logo.png';
-var splashScreenDelay = 3000; // in milliseconds
-var showSplashScreen = true; // show splashcreen by default
-var cordova = require('cordova');
-var configHelper = cordova.require('cordova/confighelper');
-
-function updateImageLocation() {
-    position.width = Math.min(splashImageWidth, window.innerWidth);
-    position.height = position.width * (splashImageHeight / splashImageWidth);
-
-    localSplash.style.width = window.innerWidth + "px";
-    localSplash.style.height = window.innerHeight + "px";
-    localSplash.style.top = "0px";
-    localSplash.style.left = "0px";
-
-    localSplashImage.style.top = "50%";
-    localSplashImage.style.left = "50%";
-    localSplashImage.style.height = position.height + "px";
-    localSplashImage.style.width = position.width + "px";
-    localSplashImage.style.marginTop = (-position.height / 2) + "px";
-    localSplashImage.style.marginLeft = (-position.width / 2) + "px";
+function notSupported(win,fail) {
+    console.log('SplashScreen is not supported');
 }
 
-function onResize() {
-    updateImageLocation();
-}
-
-var SplashScreen = {
-    setBGColor: function (cssBGColor) {
-        bgColor = cssBGColor;
-        if (localSplash) {
-            localSplash.style.backgroundColor = bgColor;
-        }
-    },
-    show: function () {
-        if(!localSplash) {
-            window.addEventListener("resize", onResize, false);
-            localSplash = document.createElement("div");
-            localSplash.style.backgroundColor = bgColor;
-            localSplash.style.position = "absolute";
-
-            localSplashImage = document.createElement("img");
-            localSplashImage.src = imageSrc;
-            localSplashImage.style.position = "absolute";
-
-            updateImageLocation();
-
-            localSplash.appendChild(localSplashImage);
-            document.body.appendChild(localSplash);
-        }
-    },
-    hide: function () {
-        if(localSplash) {
-            window.removeEventListener("resize", onResize, false);
-            document.body.removeChild(localSplash);
-            localSplash = null;
-        }
-    }
+module.exports = {
+    hide:notSupported,
+    show:notSupported
 };
-
-/**
- * Reads preferences via ConfigHelper and substitutes default parameters.
- */
-function readPreferencesFromCfg(cfg) {
-    try {
-        var value = cfg.getPreferenceValue('ShowSplashScreen');
-        if(typeof value != 'undefined') {
-            showSplashScreen = value === 'true';
-        }
-
-        splashScreenDelay = cfg.getPreferenceValue('SplashScreenDelay') || splashScreenDelay;
-        imageSrc = cfg.getPreferenceValue('SplashScreen') || imageSrc;
-        bgColor = cfg.getPreferenceValue('SplashScreenBackgroundColor') || bgColor;
-        splashImageWidth = cfg.getPreferenceValue('SplashScreenWidth') || splashImageWidth;
-        splashImageHeight = cfg.getPreferenceValue('SplashScreenHeight') || splashImageHeight;
-    } catch(e) {
-        var msg = '[Browser][SplashScreen] Error occured on loading preferences from config.xml: ' + JSON.stringify(e);
-        console.error(msg);
-    }
-}
-
-/**
- * Shows and hides splashscreen if it is enabled, with a delay according the current preferences.
- */
-function showAndHide() {
-    if(showSplashScreen) {
-        SplashScreen.show();
-
-        window.setTimeout(function() {
-            SplashScreen.hide();
-        }, splashScreenDelay);
-    }
-}
-
-/**
- * Tries to read config.xml and override default properties and then shows and hides splashcreen if it is enabled.
- */
-(function initAndShow() {
-    configHelper.readConfig(function(config) {
-        readPreferencesFromCfg(config);
-        showAndHide();
-    }, function(err) {
-        console.error(err);
-    });
-})();
 
 module.exports = SplashScreen;
 
 require("cordova/exec/proxy").add("SplashScreen", SplashScreen);
-
