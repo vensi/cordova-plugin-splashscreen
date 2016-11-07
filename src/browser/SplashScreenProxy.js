@@ -28,6 +28,5 @@ module.exports = {
     show:notSupported
 };
 
-module.exports = SplashScreen;
+require("cordova/exec/proxy").add("SplashScreen", module.exports);
 
-require("cordova/exec/proxy").add("SplashScreen", SplashScreen);
